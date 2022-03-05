@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View, Image, Pressable, Modal} from "react-native";
+import { ActivityIndicator, FlatList, StyleSheet, Text, View, Image, Pressable, Modal, useWindowDimensions, } from "react-native";
 
 export default function App() {
   const [isLoading, setLoading] = useState(true);
+  const [descIsLoading, setDescLoading] = useState(true);
   const [dex, setDex] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [desc, setDesc] = useState([]);
+  const [pokeNumber, setPokeNumber] = useState([]);
+  const window = useWindowDimensions();
+
 
   {/* get pokedex */}
   const getPokemons = async () => {
@@ -29,13 +33,15 @@ export default function App() {
       for (var i = 0; i < descriptions.length; i++) {
         if (descriptions[i].language.name == "en" && descriptions[i].version.name == "red") {
           setDesc(spc.flavor_text_entries[i].flavor_text);
-        }
+        } 
       }
     } catch {
+      setDesc('No description available');
       console.error(error);
+    } finally {
+      setDescLoading(false);
     }
   }
-
   useEffect (() => {
     getPokemons();
   }, []);
@@ -51,9 +57,32 @@ export default function App() {
           setModalVisible(!modalVisible);
         }}
       >
-        <View style={styles.desc}>
-          <Text style={styles.text}>{desc}</Text>
-        </View>  
+        {descIsLoading ? <ActivityIndicator/> : (
+          <Pressable style={styles.popup} onPress={() => {setModalVisible(false);}}>
+            <View style={{
+                borderRadius: 20,
+                borderWidth: 5,
+                borderColor: 'black',
+                backgroundColor: 'rgba(241, 241, 241, 0.9)',
+                justifyContent: 'center', 
+                alignItems: 'center',
+                width: (window.width * 0.7),
+                height: (window.height * 0.7),
+              }}
+            >
+              <Image
+                style={{
+                  width: 150,
+                  height: 150,
+                }}
+                  source={{
+                    uri: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + pokeNumber +  '.png', 
+                }}
+              />
+              <Text style={styles.text}>{desc}</Text>
+            </View>
+          </Pressable>
+        )}
       </Modal>
       {/* Pokedex */}
       {isLoading ? <ActivityIndicator/> : (
@@ -63,14 +92,24 @@ export default function App() {
             data={dex}
             keyExtractor={({ entry_number }, index) => entry_number}
             renderItem={({ item }) => (
-                <Pressable style={styles.content}
-                onPress={() => {setModalVisible(true); getDescription(item.entry_number)}}
+                <Pressable style={{borderRadius: 20,
+                  backgroundColor: '#f1f1f1',
+                  margin: 5,
+                  justifyContent: 'center', 
+                  alignItems: 'center',
+                  width: (window.width * 0.3),
+                  height: (window.width * 0.3),
+                }}
+                onPress={() => {setModalVisible(true); setDesc(''); setPokeNumber(item.entry_number); getDescription(item.entry_number);}}
                 >
                   <Image
-                      style={styles.logo}
-                      source={{
-                        uri: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + item.entry_number +  '.png', 
-                      }}
+                    style={{
+                      width: (window.width * 0.2),
+                      height: (window.width * 0.2),
+                    }}
+                    source={{
+                      uri: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + item.entry_number +  '.png', 
+                    }}
                   />
                   <Text style={styles.text}>{item.pokemon_species.name}</Text>
                 </Pressable>
@@ -81,7 +120,6 @@ export default function App() {
   )
 };
 
-
 const styles = StyleSheet.create({
     main: { 
       backgroundColor: '#c9e15c',
@@ -89,35 +127,15 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       justifyContent: 'center', 
     },
-    content: {
-      borderRadius: 20,
-      backgroundColor: '#f1f1f1',
-      margin: 5,
-      justifyContent: 'center', 
-      alignItems: 'center',
-      width: 120, 
-      height: 120
-    },
-    logo: {
-      width: 80,
-      height: 80,
-    },
     text: {
       fontWeight: 'bold',
       color: 'black',
       textAlign: 'center',
     },
-    desc: {
-      borderRadius: 20,
-      borderWidth: 5,
-      borderColor: 'black',
-      backgroundColor: 'rgba(241, 241, 241, 0.9)',
+    popup: {
       justifyContent: 'center', 
       alignItems: 'center',
-      width: 200, 
-      height: 400,
-      position: 'absolute',
-      top: '25%',
-      left: '25%',
-    },
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    }
 });
