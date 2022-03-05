@@ -6,8 +6,8 @@ export default function App() {
   const [descIsLoading, setDescLoading] = useState(true);
   const [dex, setDex] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [desc, setDesc] = useState([]);
-  const [pokeNumber, setPokeNumber] = useState([]);
+  const [desc, setDesc] = useState();
+  const [pokeNumber, setPokeNumber] = useState();
   const window = useWindowDimensions();
 
 
@@ -58,17 +58,17 @@ export default function App() {
         }}
       >
         {descIsLoading ? <ActivityIndicator/> : (
-          <Pressable style={styles.popup} onPress={() => {setModalVisible(false);}}>
-            <View style={{
+          <Pressable style={styles.popup} onPress={() => {setModalVisible(!modalVisible);}}>
+            <Pressable style={{
                 borderRadius: 20,
                 borderWidth: 5,
+                padding: 10,
                 borderColor: 'black',
                 backgroundColor: 'rgba(241, 241, 241, 0.9)',
                 justifyContent: 'center', 
                 alignItems: 'center',
-                width: (window.width * 0.7),
-                height: (window.height * 0.7),
               }}
+              onPress={() => {setModalVisible(modalVisible);}}
             >
               <Image
                 style={{
@@ -80,7 +80,7 @@ export default function App() {
                 }}
               />
               <Text style={styles.text}>{desc}</Text>
-            </View>
+            </Pressable>
           </Pressable>
         )}
       </Modal>
@@ -122,7 +122,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
     main: { 
-      backgroundColor: '#c9e15c',
+      backgroundColor: '#2a2a2a',
       flex: 1, 
       alignItems: 'center',
       justifyContent: 'center', 
